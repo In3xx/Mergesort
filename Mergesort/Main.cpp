@@ -1,6 +1,7 @@
 #include <iostream>
-#include<stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <list>
 #include <time.h>
 
 using namespace std;
@@ -11,6 +12,12 @@ void PrintArray(int*, int);
 void Divide(int*, int);
 int* Merge(int*, int, int*, int);
 void Free(int* arr);
+
+struct Array
+{
+	int size;
+	int arr[];
+};
 
 int main() {
 	int arrSize;
@@ -43,31 +50,43 @@ void PrintArray(int* arr, int arrSize) {
 }
 
 void Divide(int* arr, int arrSize) {
-	int retCount = 0;
-	int divideCnt = 2;
-	int dividedSize = arrSize;
-	while (dividedSize != 1)
-	{
-		if (dividedSize % 2 != 0) {
-			dividedSize /= 2;
-			for (int i = 0, j = 0; i < divideCnt; i++, j = 0) {
-				cout << "[ ";
-				while (j < dividedSize)
-				{
-					cout << arr[j + (i * dividedSize)] << " ";
-					j++;
-				}
-				cout << "]    ";
-			}
-			ENDL;
-			divideCnt *= 2;
-		}
-		else {
-			dividedSize /= 2;
-			//if(dividedSize)
-		}
-	}
+	//int retCount = 0;
+	//int divideCnt = 2;
+	//int dividedSize = arrSize;
+	//while (dividedSize != 1)
+	//{
+	//	if (dividedSize % 2 != 0) {
+	//		dividedSize /= 2;
+	//		for (int i = 0, j = 0; i < divideCnt; i++, j = 0) {
+	//			cout << "[ ";
+	//			while (j < dividedSize)
+	//			{
+	//				cout << arr[j + (i * dividedSize)] << " ";
+	//				j++;
+	//			}
+	//			cout << "]    ";
+	//		}
+	//		ENDL;
+	//		divideCnt *= 2;
+	//	}
+	//	else {
+	//		dividedSize /= 2;
+	//		//if(dividedSize)
+	//	}
+	//}
 	//Free(arr);
+	/*int maxSize = arrSize;
+	int layer = 0;
+	int start, mid, last;
+	Array* dividedArr;
+
+	do
+	{
+		for each (object var in collection_to_loop)
+		{
+
+		}
+	} while (maxSize > 1);*/
 }
 
 int* Merge(int* left, int leftSize, int* right, int rightSize) {
