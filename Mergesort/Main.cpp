@@ -8,16 +8,19 @@ using namespace std;
 
 #define ENDL		cout << endl
 #define FREE(ptr)	{if(ptr){free(ptr); ptr = nullptr;}}
-
-void PrintArray(int*, int);
-void Divide(int*, int);
-int* Merge(int*, int, int*, int);
+#define CHECK		printf("Check\n")
 
 struct Array
 {
 	int size = 0;
 	int* arr = nullptr;
 };
+
+void PrintArray(int*, int);
+void Divide(Array*, int*, int);
+void Sort(int*, int*, int, int*, int);
+void Merge(Array*, int);
+
 
 int main() {
 	int arrSize;
@@ -34,37 +37,37 @@ int main() {
 	for (int i = 0; i < arrSize; i++)
 		*(arr + i) = (rand() % maxValue + 1);
 
-	//PrintArray(arr, arrSize);
-	//ENDL;
+	//구조체 선언
+	Array* retStruct = (Array*)malloc(sizeof(Array) * arrSize);
 
-	Divide(arr, arrSize);
+	Divide(retStruct, arr, arrSize);
+
+	Merge(retStruct, arrSize);
 
 	return 0;
 }
 
 void PrintArray(int* arr, int arrSize) {
+	printf("[ ");
 	for (int i = 0; i < arrSize; i++)
-		cout << *(arr + i) << " ";
-	cout << "\t";
+		printf("%d ", arr[i]);
+	printf("] ");
 }
 
-void Divide(int* arr, int arrSize) {
+void Divide(Array* retStruct, int* arr, int arrSize) {
 	int maxSize = arrSize;
 	int printLayer = 1;
 	int count = 0;
 
-	//구조체 선언
-	Array* dividedArr = (Array*)malloc(sizeof(struct Array) * arrSize);
-	dividedArr[0].arr = (int*)malloc(sizeof(int) * arrSize);
-	
+	retStruct[0].arr = (int*)malloc(sizeof(int) * arrSize);	
 	for (int i = 0; i < arrSize; i++)
 	{
-		dividedArr[0].size = arrSize;
-		dividedArr[0].arr[i] = arr[i];
+		retStruct[0].size = arrSize;
+		retStruct[0].arr[i] = arr[i];
 	}
 	FREE(arr);
 
-	PrintArray(dividedArr[0].arr, dividedArr[0].size);
+	PrintArray(retStruct[0].arr, retStruct[0].size);
 	ENDL;
 
 	do
@@ -72,95 +75,80 @@ void Divide(int* arr, int arrSize) {
 		for (int i = 0; i < arrSize; i++)
 		{
 			//제일 큰배열부터 이분할
-			if (dividedArr[i].size >= maxSize) {
+			if (retStruct[i].size >= maxSize && maxSize > 1) {
 				//left, right 사이즈 설정
-				int leftSize = dividedArr[i].size / 2;
-				int rightSize = dividedArr[i].size / 2 + dividedArr[i].size % 2;
+				int leftSize = retStruct[i].size / 2;
+				int rightSize = retStruct[i].size / 2 + retStruct[i].size % 2;
 
 				//left, right 임시 할당
 				int* left = (int*)malloc(sizeof(int) * leftSize);
 				int* right = (int*)malloc(sizeof(int) * rightSize);
 
 				//left, right 원소값 넣기
-				for (int k = 0; k < dividedArr[i].size; k++)
+				for (int j = 0; j < retStruct[i].size; j++)
 				{
-					if (k < leftSize)
-						left[k] = dividedArr[i].arr[k];
+					if (j < leftSize)
+						left[j] = retStruct[i].arr[j];
 					else
-						right[k - leftSize] = dividedArr[i].arr[k];
+						right[j - leftSize] = retStruct[i].arr[j];
 				}
-				//임시출력
-				/*for (int l = 0; l < dividedArr[i].size; l++)
-				{
-					printf("LEFT(%d)  ", left[l]);
-					printf("RIGHT(%d)\n", right[l]);
-				}*/
 
 				//부모배열 할당해제
-				FREE(dividedArr[i].arr);
-				dividedArr[i].size = 0;
+				FREE(retStruct[i].arr);
+				retStruct[i].size = 0;
 
-				//left, right를 두 자리씩 넣기
-				for (int j = i; j < arrSize - 1; j++)
-				{
-					//left
-					dividedArr[j].arr = (int*)malloc(sizeof(int) * leftSize);
-					dividedArr[j].size = leftSize;
-					for (int x = 0; x < dividedArr[j].size; x++) {
-						dividedArr[j].arr[x] = left[x];
-					}
+				//left삽입
+				retStruct[i].arr = (int*)malloc(sizeof(int) * leftSize);
+				retStruct[i].size = leftSize;
+				for (int j = 0; j < retStruct[i].size; j++) {
+					retStruct[i].arr[j] = left[j];
+				}
 
-					//right
-					if (dividedArr[j + 1].arr == nullptr) {
-						dividedArr[j + 1].arr = (int*)malloc(sizeof(int) * rightSize);
-						dividedArr[j + 1].size = rightSize;
-						for (int x = 0; x < dividedArr[j + 1].size; x++) {
-							dividedArr[j + 1].arr[x] = left[x];
-						}
+				//right삽입
+				if (retStruct[i + 1].arr == nullptr) {
+					retStruct[i + 1].arr = (int*)malloc(sizeof(int) * rightSize);
+					retStruct[i + 1].size = rightSize;
+					for (int j = 0; j < retStruct[i + 1].size; j++) {
+						retStruct[i + 1].arr[j] = right[j];
 					}
-					else {
-						for (int u = arrSize - 1; u >= j + 1; u--)
-						{
-							dividedArr[u + 1] = dividedArr[u];
-						}
-						dividedArr[j + 1].arr = (int*)malloc(sizeof(int) * rightSize);
-						dividedArr[j + 1].size = rightSize;
-						for (int x = 0; x < dividedArr[j + 1].size; x++) {
-							dividedArr[j + 1].arr[x] = left[x];
-						}
+				}
+				else {
+					for (int j = arrSize - 1; j > i + 1 ; j--)
+					{
+						retStruct[j] = retStruct[j - 1];
+					}
+					retStruct[i + 1].arr = (int*)malloc(sizeof(int) * rightSize);
+					retStruct[i + 1].size = rightSize;
+					for (int j = 0; j < retStruct[i + 1].size; j++) {
+						retStruct[i + 1].arr[j] = right[j];
 					}
 				}
 				FREE(left);
 				FREE(right);
 				count++;
-				//출력
-				if (count == printLayer || count == arrSize) {
-					count = 0;
-					printLayer *= 2;
-					for (int i = 0; i < printLayer; i++)
-					{
-						if (i < arrSize) {
-							printf("[ ");
-							for (int j = 0; j < dividedArr[i].size; j++)
-								printf("%d ", dividedArr[i].arr[j]);
-							printf("] ");
-						}
-						else break;
-					}
-					ENDL;
-				}
 				//maxSize 설정
 				maxSize = 0;
 				for (int i = 0; i < arrSize; i++)
-					if (maxSize < dividedArr[i].size)
-						maxSize = dividedArr[i].size;
+					if (maxSize < retStruct[i].size)
+						maxSize = retStruct[i].size;
+				//출력
+				if (count == printLayer || maxSize == 1) {
+					count = 0;
+					printLayer *= 2;
+					for (int k = 0; k < printLayer; k++)
+					{
+						if (k >= arrSize)	break;
+						PrintArray(retStruct[k].arr, retStruct[k].size);
+					}
+					ENDL;
+				}
+				break;
 			}
 		}
 	} while (maxSize > 1);
 }
 
-int* Merge(int* left, int leftSize, int* right, int rightSize) {
-	int* ret = (int*)malloc(sizeof(int) * (leftSize + rightSize));
+void Sort(int* ret, int* left, int leftSize, int* right, int rightSize) {
 	int retIndex = 0;
 	int leftIndex = 0;
 	int rightIndex = 0;
@@ -185,12 +173,41 @@ int* Merge(int* left, int leftSize, int* right, int rightSize) {
 			ret[retIndex++] = right[rightIndex++];
 		}
 	}
+}
 
-	PrintArray(ret, leftSize + rightSize);
-	ENDL;
+void Merge(Array* dividedArr, int arrSize)
+{
+	int divideSize = arrSize;
+	do
+	{
+		bool flag = divideSize % 2;
+		divideSize = divideSize / 2 + divideSize % 2;
+		Array* temp = (Array*)malloc(sizeof(Array) * divideSize);
+		for (int i = 0, j = 0; i < divideSize; i++, j += 2) {
+			temp[i].arr = (int*)malloc(sizeof(int) * (dividedArr[j].size + dividedArr[j + 1].size));
+			temp[i].size = dividedArr[j].size + dividedArr[j + 1].size;
+			Sort(temp[i].arr, dividedArr[j].arr, dividedArr[j].size, dividedArr[j + 1].arr, dividedArr[j + 1].size);
+			if (i == divideSize - 1) 
+				if (flag) {
+					temp[i].arr = (int*)malloc(sizeof(int) * (dividedArr[j].size));
+					temp[i].size = dividedArr[j].size;
+					temp[i] = dividedArr[j];
+				}					
+		}
+		for (int i = 0; i < arrSize; i++) {
+			if(i < divideSize)
+				dividedArr[i] = temp[i];
+			else {
+				dividedArr[i].arr = nullptr;
+				dividedArr[i].size = 0;
+			}
+		}
+		for (int i = 0; i < divideSize; i++)
+		{
+			PrintArray(dividedArr[i].arr, dividedArr[i].size);
+		}
+		ENDL;
+		FREE(temp);
+	} while (divideSize > 1);
 
-	FREE(left);
-	FREE(right);
-
-	return ret;
 }
