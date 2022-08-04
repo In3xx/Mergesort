@@ -19,7 +19,7 @@ struct Array
 void PrintArray(int*, int);
 void Divide(Array*, int*, int);
 void Sort(int*, int*, int, int*, int);
-void Merge(Array*, int);
+void Merge_1(Array*, int);
 
 
 int main() {
@@ -42,7 +42,7 @@ int main() {
 
 	Divide(retStruct, arr, arrSize);
 
-	Merge(retStruct, arrSize);
+	Merge_1(retStruct, arrSize);
 
 	return 0;
 }
@@ -125,13 +125,13 @@ void Divide(Array* retStruct, int* arr, int arrSize) {
 				}
 				FREE(left);
 				FREE(right);
-				count++;
 				//maxSize 설정
 				maxSize = 0;
 				for (int i = 0; i < arrSize; i++)
 					if (maxSize < retStruct[i].size)
 						maxSize = retStruct[i].size;
 				//출력
+				count++;
 				if (count == printLayer || maxSize == 1) {
 					count = 0;
 					printLayer *= 2;
@@ -152,7 +152,7 @@ void Sort(int* ret, int* left, int leftSize, int* right, int rightSize) {
 	int retIndex = 0;
 	int leftIndex = 0;
 	int rightIndex = 0;
-
+	//작은것들부터 하나씩 비교하며 채워넣기
 	while ((leftIndex < leftSize) && (rightIndex < rightSize)) {
 		if (left[leftIndex] > right[rightIndex]) {
 			ret[retIndex++] = right[rightIndex++];
@@ -161,13 +161,13 @@ void Sort(int* ret, int* left, int leftSize, int* right, int rightSize) {
 			ret[retIndex++] = left[leftIndex++];
 		}
 	}
-
+	//왼쪽의 남은것들을 채워넣기
 	if (leftIndex < leftSize) {
 		while (leftIndex < leftSize) {
 			ret[retIndex++] = left[leftIndex++];
 		}
 	}
-
+	//오른쪽의 남은것들을 채워넣기
 	else if (rightIndex < rightSize) {
 		while (rightIndex < rightSize) {
 			ret[retIndex++] = right[rightIndex++];
@@ -175,24 +175,28 @@ void Sort(int* ret, int* left, int leftSize, int* right, int rightSize) {
 	}
 }
 
-void Merge(Array* dividedArr, int arrSize)
+void Merge_1(Array* dividedArr, int arrSize)
 {
 	int divideSize = arrSize;
 	do
 	{
+		//홀수 플래그
 		bool flag = divideSize % 2;
+		//
 		divideSize = divideSize / 2 + divideSize % 2;
 		Array* temp = (Array*)malloc(sizeof(Array) * divideSize);
 		for (int i = 0, j = 0; i < divideSize; i++, j += 2) {
 			temp[i].arr = (int*)malloc(sizeof(int) * (dividedArr[j].size + dividedArr[j + 1].size));
 			temp[i].size = dividedArr[j].size + dividedArr[j + 1].size;
-			Sort(temp[i].arr, dividedArr[j].arr, dividedArr[j].size, dividedArr[j + 1].arr, dividedArr[j + 1].size);
-			if (i == divideSize - 1) 
+			if (i == divideSize - 1)
 				if (flag) {
 					temp[i].arr = (int*)malloc(sizeof(int) * (dividedArr[j].size));
 					temp[i].size = dividedArr[j].size;
 					temp[i] = dividedArr[j];
-				}					
+					break;
+				}
+			Sort(temp[i].arr, dividedArr[j].arr, dividedArr[j].size, dividedArr[j + 1].arr, dividedArr[j + 1].size);
+			
 		}
 		for (int i = 0; i < arrSize; i++) {
 			if(i < divideSize)
