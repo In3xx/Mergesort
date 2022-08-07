@@ -45,6 +45,7 @@ int main() {
 	Divide_2(retStruct, arr, arrSize);
 
 	//Merge_1(retStruct, arrSize);
+	system("pause");
 
 	return 0;
 }
@@ -292,14 +293,49 @@ void Merge_2(Array* retStruct, int arrSize)
 		layerCnt++;
 		printLayer *= 2;
 	}
-	int rest = arrSize % layerCnt;
-
+	int inx = arrSize - printLayer;
+	Array* temp = (Array*)malloc(sizeof(Array) * printLayer);
+	//처음에는 2^n으로 초기화
+	if (inx > 0) {
+		temp[0].size = 2;
+		int cnt = 1;		//inx용 카운트
+		int x_cnt = 1;		//x8 할 카운트
+		while (inx > cnt)
+		{
+			//반채웠을때 한칸플러스해서 초기화
+			if (cnt == (arrSize - inx) / 2) {
+				temp[i + 1].size = 2;
+				cnt++;
+				continue;
+			}
+			//printLayer의 자리에 2크기
+			printLayer /= 2;
+			for (int i = 1; i <= x_cnt; i++)
+			{
+				for (int j = printLayer * x_cnt; j < arrSize - inx; j + (arrSize - inx) / 2)
+				{
+					if (cnt < (arrSize - inx) / 2) {
+						if (temp[j].size != 2) {
+							CHECK;
+							temp[j].size = 2;
+							cnt++;
+						}
+						else continue;
+					}
+					else {
+						if (temp[j + 1].size != 2) {
+							temp[j + 1].size = 2;
+							cnt++;
+						}
+						else continue;
+					}
+				}
+			}
+			x_cnt++;
+		}
+	}
 	do
 	{
-		/*int mergeCnt = arrSize - printLayer;
-
-		Array* temp = (Array*)malloc(sizeof(Array) * printLayer);*/
-
 		
 	} while (true);
 }
