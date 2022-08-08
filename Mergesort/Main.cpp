@@ -377,48 +377,48 @@ void Merge_2(Array* retStruct, int arrSize)
 	//free temp
 	FREE(temp);
 }
-
-void Binary(int* ret, int arrSize) {
-	int layerCnt = 1;
-	int even = 0;
-	for (int i = 0; i < arrSize; i++)
-	{
-		ret[i] = 0;
-	}
-	do
-	{
-		int minimum = 0;
-		int cnt = 0;
-		do
-		{
-			for (int i = 0; i < layerCnt; i++)
-			{
-				if (ret[i] == minimum) {
-					if (layerCnt == 1) {
-						even += 2;
-						minimum += 2;
-						cnt++;
-						break;
-					}
-					else
-					{
-						for (int j = arrSize - 2; j >= i + 1; j--)
-						{
-							ret[j + 1] = ret[j];
-						}
-						ret[i + 1] = even;
-						even += 2;
-						minimum += 2;
-						cnt++;
-					}
-				}
-			}
-		} while (cnt < layerCnt);
-		PrintArray(ret, arrSize);
-		endl;
-		layerCnt *= 2;
-	} while (even < arrSize);
-}
+//
+//void Binary(int* ret, int arrSize) {
+//	int layerCnt = 1;
+//	int even = 0;
+//	for (int i = 0; i < arrSize; i++)
+//	{
+//		ret[i] = 0;
+//	}
+//	do
+//	{
+//		int minimum = 0;
+//		int cnt = 0;
+//		do
+//		{
+//			for (int i = 0; i < layerCnt; i++)
+//			{
+//				if (ret[i] == minimum) {
+//					if (layerCnt == 1) {
+//						even += 2;
+//						minimum += 2;
+//						cnt++;
+//						break;
+//					}
+//					else
+//					{
+//						for (int j = arrSize - 2; j >= i + 1; j--)
+//						{
+//							ret[j + 1] = ret[j];
+//						}
+//						ret[i + 1] = even;
+//						even += 2;
+//						minimum += 2;
+//						cnt++;
+//					}
+//				}
+//			}
+//		} while (cnt < layerCnt);
+//		PrintArray(ret, arrSize);
+//		endl;
+//		layerCnt *= 2;
+//	} while (even < arrSize);
+//}
 
 void Binary(int* ret, int arrSize) {
 	
@@ -434,6 +434,8 @@ void Binary(int* ret, int arrSize) {
 	{
 		int minimum = 0;
 		int cnt = 0;
+		layer *= 2;
+		even += 2;
 		do
 		{
 			if (layer == 1) {
@@ -443,7 +445,7 @@ void Binary(int* ret, int arrSize) {
 			}
 			for (int i = 0; i < layer; i++)
 			{
-				if (ret[i] <= minimum) {
+				if (ret[i] == minimum) {
 					for (int j = arrSize - 2; j >= i + 1; j--)
 					{
 						ret[j + 1] = ret[j];
@@ -452,9 +454,10 @@ void Binary(int* ret, int arrSize) {
 					even += 2;
 					minimum += 2;
 					i++;
-					//이부분 while 벗어나는 조건 만들어야함
+					tempCnt++;
 				}
 			}
-		} while (true);
+		} while (tempCnt < layer);
+		tempCnt = 0;
 	} while (true);
 }
