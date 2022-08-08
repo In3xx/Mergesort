@@ -18,7 +18,7 @@ struct Array
 
 void PrintArray(int*, int);
 void Divide_1(Array*, int*, int);
-void Divide_2(Array*, int*, int);
+void Divide(Array*, int*, int);
 void Sort(int*, int*, int, int*, int);
 void Merge_1(Array*, int);
 void Merge_2(Array*, int);
@@ -41,23 +41,23 @@ int main() {
 		*(arr + i) = (rand() % maxValue + 1);
 
 	//구조체 선언
-	//Array* retStruct = (Array*)malloc(sizeof(Array) * arrSize);
-	//
-	//Divide_2(retStruct, arr, arrSize);
-	//
-	//Merge_2(retStruct, arrSize);
-	//Merge_1(retStruct, arrSize);
+	Array* retStruct = (Array*)malloc(sizeof(Array) * arrSize);
+	
+	Divide(retStruct, arr, arrSize);
+	
+	Merge_2(retStruct, arrSize);
+	Merge_1(retStruct, arrSize);
 
-	Binary(arr, arrSize);
+	endl;
 
 	return 0;
 }
 
 void PrintArray(int* arr, int arrSize) {
-	printf("[ ");
+	printf("< ");
 	for (int i = 0; i < arrSize; i++)
 		printf("%d ", arr[i]);
-	printf("] ");
+	printf(">");
 }
 
 void Divide_1(Array* retStruct, int* arr, int arrSize) {
@@ -154,7 +154,7 @@ void Divide_1(Array* retStruct, int* arr, int arrSize) {
 	} while (maxSize > 1);
 }
 
-void Divide_2(Array* retStruct, int* arr, int arrSize) {
+void Divide(Array* retStruct, int* arr, int arrSize) {
 	PrintArray(arr, arrSize);
 	endl;
 	int layerSize = 1;
@@ -245,10 +245,11 @@ void Sort(int* ret, int* left, int leftSize, int* right, int rightSize) {
 	}
 }
 
+//2^n개 Array Merge
 void Merge_1(Array* retStruct, int arrSize)
 {
 	int tempSize = 1;	//temp 구조체 사이즈
-	while ((tempSize << 1) < arrSize)
+	while ((tempSize << 1) <= arrSize)
 	{
 		tempSize *= 2;
 	}
@@ -280,60 +281,42 @@ void Merge_1(Array* retStruct, int arrSize)
 
 }
 
+//2^n개 index를 갖는 Array 생성
 void Merge_2(Array* retStruct, int arrSize)
 {
-	int layer = 1;	//2^N
+	int layer = 1;		//2^N
 	int tempSize = 1;	//temp 구조체 사이즈
-	int cnt = 0;		//inx용 카운트
-	int x_cnt = 0;		//x8 할 카운트
-	//arrSize 이하의 
-	while ((layer << 1) < arrSize)
+	//arrSize 이하의 layer, tempsize 설정
+	while ((layer << 1) <= arrSize)
 	{
 		layer *= 2;		//변화값
-		tempSize *= 2;		//고정값
+		tempSize *= 2;	//고정값
 	}
 	int inx = arrSize - tempSize;//**중요값**
+	//2^n개 index를 가지면 리턴
+	if (inx == 0)	return; 
+
+	//printf("layer [%d], tempSize [%d], inx[%d]\n", layer, tempSize, inx);
 
 	Array* temp = (Array*)malloc(sizeof(Array) * tempSize);
 	for (int i = 0; i < tempSize; i++)
 		temp[i].size = 1;
 
-	if (inx > 0)
-	{
-		int x_cnt = 1;
-		temp[0].size = 2;
-		cnt++;
-		while (inx > cnt)
+	if (inx > 0) {
+		//바이너리 배열 인덱스값 바탕으로 머지
+		int binSize = tempSize / 2;
+		int* binArr = (int*)malloc(sizeof(int) * binSize);
+		int tempIndex = 0;
+		Binary(binArr, binSize);
+
+		for (int i = 0, j = 0; i < inx; i++)
 		{
-			//바이너리 배열하나 받아서 그곳의 인덱스값 바탕으로 머지하기(지금것 말고)
-			if (cnt == tempSize / 2) {
-				layer = tempSize;
-				x_cnt = 1;
-				temp[1].size = 2;
-				cnt++;
-				continue;
+			if (i < binSize) {
+				tempIndex = binArr[i];
 			}
-			layer /= 2;
-			for (int i = 0; i < x_cnt; i++)
-			{
-					for (int j = layer + i * (tempSize / 4); j < tempSize; j += tempSize / 2)
-					{
-						if (inx > cnt) {
-							if (temp[j].size == 2)
-								continue;
-							temp[j].size = 2;
-							cnt++;
-							if (cnt > tempSize / 2) {
-								if (temp[j + 1].size == 2)
-									continue;
-								temp[j + 1].size = 2;
-								cnt++;
-							}
-						}
-						else break;
-					}				
-			}
-			x_cnt += 2;
+			else
+				tempIndex = binArr[j++] + 1;
+			temp[tempIndex].size = 2;
 		}
 	}
 	//temp사이즈에 따라 삽입
@@ -348,7 +331,8 @@ void Merge_2(Array* retStruct, int arrSize)
 				i_cnt += 2;
 				break;
 			}
-			else temp[i].arr[j] = retStruct[i_cnt++].arr[0];
+			else
+				temp[i].arr[j] = retStruct[i_cnt++].arr[0];
 		}
 	}
 
@@ -377,87 +361,43 @@ void Merge_2(Array* retStruct, int arrSize)
 	//free temp
 	FREE(temp);
 }
-//
-//void Binary(int* ret, int arrSize) {
-//	int layerCnt = 1;
-//	int even = 0;
-//	for (int i = 0; i < arrSize; i++)
-//	{
-//		ret[i] = 0;
-//	}
-//	do
-//	{
-//		int minimum = 0;
-//		int cnt = 0;
-//		do
-//		{
-//			for (int i = 0; i < layerCnt; i++)
-//			{
-//				if (ret[i] == minimum) {
-//					if (layerCnt == 1) {
-//						even += 2;
-//						minimum += 2;
-//						cnt++;
-//						break;
-//					}
-//					else
-//					{
-//						for (int j = arrSize - 2; j >= i + 1; j--)
-//						{
-//							ret[j + 1] = ret[j];
-//						}
-//						ret[i + 1] = even;
-//						even += 2;
-//						minimum += 2;
-//						cnt++;
-//					}
-//				}
-//			}
-//		} while (cnt < layerCnt);
-//		PrintArray(ret, arrSize);
-//		endl;
-//		layerCnt *= 2;
-//	} while (even < arrSize);
-//}
 
+//이진트리 우선순위를 정하는 알고리즘
 void Binary(int* ret, int arrSize) {
-	
-	int layer = 1;			//layer
-	int tempCnt = 0;		//추가될원소의개수
-	int even = 0;			//늘어날 짝수
-
-	//ret 배열 초기화
 	for (int i = 0; i < arrSize; i++)
-		ret[i] = 0;
-	
+		ret[i] = 1;
+
+	int layer = 1;
+	int even = 0;
+	int minimum = 0;
+
 	do
 	{
-		int minimum = 0;
-		int cnt = 0;
-		layer *= 2;
-		even += 2;
 		do
 		{
+			//1층일때
 			if (layer == 1) {
-				layer *= 2;
+				ret[0] = even;
 				even += 2;
 				break;
 			}
-			for (int i = 0; i < layer; i++)
+			for (int i = 0; i < arrSize; i++)
 			{
 				if (ret[i] == minimum) {
-					for (int j = arrSize - 2; j >= i + 1; j--)
-					{
+					for (int j = arrSize - 2; j > i; j--)
 						ret[j + 1] = ret[j];
-					}
 					ret[i + 1] = even;
 					even += 2;
 					minimum += 2;
-					i++;
-					tempCnt++;
+					break;
 				}
 			}
-		} while (tempCnt < layer);
-		tempCnt = 0;
-	} while (true);
+			int tempcnt = 0;
+			for (int i = 0; i < arrSize; i++)
+				if (ret[i] != 1)	tempcnt++;
+			if (tempcnt == layer)	break;
+		} while (true);
+		layer *= 2;
+		minimum = 0;
+	} while (layer <= arrSize);
 }
