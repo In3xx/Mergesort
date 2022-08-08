@@ -6,9 +6,9 @@
 
 using namespace std;
 
-#define ENDL		cout << endl
+#define endl		cout << endl
 #define FREE(ptr)	{if(ptr){free(ptr); ptr = nullptr;}}
-#define CHECK		printf("Check\n")
+#define check		printf("Check\n")
 
 struct Array
 {
@@ -22,6 +22,7 @@ void Divide_2(Array*, int*, int);
 void Sort(int*, int*, int, int*, int);
 void Merge_1(Array*, int);
 void Merge_2(Array*, int);
+void Binary(int*, int);
 
 
 int main() {
@@ -40,12 +41,14 @@ int main() {
 		*(arr + i) = (rand() % maxValue + 1);
 
 	//구조체 선언
-	Array* retStruct = (Array*)malloc(sizeof(Array) * arrSize);
-
-	Divide_2(retStruct, arr, arrSize);
-
+	//Array* retStruct = (Array*)malloc(sizeof(Array) * arrSize);
+	//
+	//Divide_2(retStruct, arr, arrSize);
+	//
+	//Merge_2(retStruct, arrSize);
 	//Merge_1(retStruct, arrSize);
-	system("pause");
+
+	Binary(arr, arrSize);
 
 	return 0;
 }
@@ -54,7 +57,7 @@ void PrintArray(int* arr, int arrSize) {
 	printf("[ ");
 	for (int i = 0; i < arrSize; i++)
 		printf("%d ", arr[i]);
-	printf("]");
+	printf("] ");
 }
 
 void Divide_1(Array* retStruct, int* arr, int arrSize) {
@@ -71,7 +74,7 @@ void Divide_1(Array* retStruct, int* arr, int arrSize) {
 	FREE(arr);
 
 	PrintArray(retStruct[0].arr, retStruct[0].size);
-	ENDL;
+	endl;
 
 	do
 	{
@@ -143,7 +146,7 @@ void Divide_1(Array* retStruct, int* arr, int arrSize) {
 						if (k >= arrSize)	break;
 						PrintArray(retStruct[k].arr, retStruct[k].size);
 					}
-					ENDL;
+					endl;
 				}
 				break;
 			}
@@ -153,7 +156,7 @@ void Divide_1(Array* retStruct, int* arr, int arrSize) {
 
 void Divide_2(Array* retStruct, int* arr, int arrSize) {
 	PrintArray(arr, arrSize);
-	ENDL;
+	endl;
 	int layerSize = 1;
 	//retStruct에 arr삽입
 	retStruct[0].arr = (int*)malloc(sizeof(int) * arrSize);
@@ -210,7 +213,7 @@ void Divide_2(Array* retStruct, int* arr, int arrSize) {
 				PrintArray(retStruct[i].arr, retStruct[i].size);
 			else break;
 		}
-		ENDL;
+		endl;
 
 	} while (layerSize < arrSize);
 }
@@ -242,100 +245,216 @@ void Sort(int* ret, int* left, int leftSize, int* right, int rightSize) {
 	}
 }
 
-void Merge_1(Array* dividedArr, int arrSize)
+void Merge_1(Array* retStruct, int arrSize)
 {
-	int divideSize = arrSize;
+	int tempSize = 1;	//temp 구조체 사이즈
+	while ((tempSize << 1) < arrSize)
+	{
+		tempSize *= 2;
+	}
 	do
 	{
-		//홀수 플래그
-		bool flag = divideSize % 2;
-		divideSize = divideSize / 2 + divideSize % 2;
+		tempSize /= 2;
 		//임시로 저장시킬 구조체
-		Array* temp = (Array*)malloc(sizeof(Array) * divideSize);
-		for (int i = 0, j = 0; i < divideSize; i++, j += 2) {
-			temp[i].arr = (int*)malloc(sizeof(int) * (dividedArr[j].size + dividedArr[j + 1].size));
-			temp[i].size = dividedArr[j].size + dividedArr[j + 1].size;
-			//마지막 인덱스가 홀수 일때는 그냥 추가
-			if (i == divideSize - 1)
-				if (flag) {
-					temp[i].arr = (int*)malloc(sizeof(int) * (dividedArr[j].size));
-					temp[i].size = dividedArr[j].size;
-					temp[i] = dividedArr[j];
-					break;
-				}
-			Sort(temp[i].arr, dividedArr[j].arr, dividedArr[j].size, dividedArr[j + 1].arr, dividedArr[j + 1].size);
-			
+		Array* temp = (Array*)malloc(sizeof(Array) * tempSize);
+		for (int i = 0, j = 0; i < tempSize; i++, j += 2) {
+			temp[i].arr = (int*)malloc(sizeof(int) * (retStruct[j].size + retStruct[j + 1].size));
+			temp[i].size = retStruct[j].size + retStruct[j + 1].size;
+			Sort(temp[i].arr, retStruct[j].arr, retStruct[j].size, retStruct[j + 1].arr, retStruct[j + 1].size);			
 		}
 		for (int i = 0; i < arrSize; i++) {
-			if(i < divideSize)
-				dividedArr[i] = temp[i];
+			if(i < tempSize)
+				retStruct[i] = temp[i];
 			else {
-				dividedArr[i].arr = nullptr;
-				dividedArr[i].size = 0;
+				retStruct[i].arr = nullptr;
+				retStruct[i].size = 0;
 			}
 		}
-		for (int i = 0; i < divideSize; i++)
-		{
-			PrintArray(dividedArr[i].arr, dividedArr[i].size);
-		}
-		ENDL;
 		FREE(temp);
-	} while (divideSize > 1);
+		for (int i = 0; i < tempSize; i++)
+		{
+			PrintArray(retStruct[i].arr, retStruct[i].size);
+		}
+		endl;
+	} while (tempSize > 1);
 
 }
 
 void Merge_2(Array* retStruct, int arrSize)
 {
-	int layerCnt = 1;
-	int printLayer = 1;
-	while ((printLayer << 1) < arrSize)
+	int layer = 1;	//2^N
+	int tempSize = 1;	//temp 구조체 사이즈
+	int cnt = 0;		//inx용 카운트
+	int x_cnt = 0;		//x8 할 카운트
+	//arrSize 이하의 
+	while ((layer << 1) < arrSize)
 	{
-		layerCnt++;
-		printLayer *= 2;
+		layer *= 2;		//변화값
+		tempSize *= 2;		//고정값
 	}
-	int inx = arrSize - printLayer;
-	Array* temp = (Array*)malloc(sizeof(Array) * printLayer);
-	//처음에는 2^n으로 초기화
-	if (inx > 0) {
+	int inx = arrSize - tempSize;//**중요값**
+
+	Array* temp = (Array*)malloc(sizeof(Array) * tempSize);
+	for (int i = 0; i < tempSize; i++)
+		temp[i].size = 1;
+
+	if (inx > 0)
+	{
+		int x_cnt = 1;
 		temp[0].size = 2;
-		int cnt = 1;		//inx용 카운트
-		int x_cnt = 1;		//x8 할 카운트
+		cnt++;
 		while (inx > cnt)
 		{
-			//반채웠을때 한칸플러스해서 초기화
-			if (cnt == (arrSize - inx) / 2) {
-				temp[i + 1].size = 2;
+			//바이너리 배열하나 받아서 그곳의 인덱스값 바탕으로 머지하기(지금것 말고)
+			if (cnt == tempSize / 2) {
+				layer = tempSize;
+				x_cnt = 1;
+				temp[1].size = 2;
 				cnt++;
 				continue;
 			}
-			//printLayer의 자리에 2크기
-			printLayer /= 2;
-			for (int i = 1; i <= x_cnt; i++)
+			layer /= 2;
+			for (int i = 0; i < x_cnt; i++)
 			{
-				for (int j = printLayer * x_cnt; j < arrSize - inx; j + (arrSize - inx) / 2)
-				{
-					if (cnt < (arrSize - inx) / 2) {
-						if (temp[j].size != 2) {
-							CHECK;
+					for (int j = layer + i * (tempSize / 4); j < tempSize; j += tempSize / 2)
+					{
+						if (inx > cnt) {
+							if (temp[j].size == 2)
+								continue;
 							temp[j].size = 2;
 							cnt++;
+							if (cnt > tempSize / 2) {
+								if (temp[j + 1].size == 2)
+									continue;
+								temp[j + 1].size = 2;
+								cnt++;
+							}
 						}
-						else continue;
-					}
-					else {
-						if (temp[j + 1].size != 2) {
-							temp[j + 1].size = 2;
-							cnt++;
-						}
-						else continue;
-					}
-				}
+						else break;
+					}				
 			}
-			x_cnt++;
+			x_cnt += 2;
 		}
+	}
+	//temp사이즈에 따라 삽입
+	for (int i = 0, i_cnt = 0 ; i < tempSize; i++)
+	{
+		temp[i].arr = (int*)malloc(sizeof(int) * temp[i].size);
+		
+		for (int j = 0; j < temp[i].size; j++)
+		{
+			if (temp[i].size > 1) {
+				Sort(temp[i].arr, retStruct[i_cnt].arr, retStruct[i_cnt].size, retStruct[i_cnt + 1].arr, retStruct[i_cnt + 1].size);
+				i_cnt += 2;
+				break;
+			}
+			else temp[i].arr[j] = retStruct[i_cnt++].arr[0];
+		}
+	}
+
+	//다시 retStruct에 삽입
+	for (int i = 0; i < arrSize; i++)
+	{
+		if (i < tempSize) {
+			for (int j = 0; j < temp[i].size; j++)
+			{
+				retStruct[i].arr[j] = temp[i].arr[j];
+				retStruct[i].size = temp[i].size;
+			}
+			//FREE temp->arr
+			FREE(temp[i].arr);
+		}
+		else{
+			FREE(retStruct[i].arr);
+			retStruct[i].size = 0;
+		}
+	}
+	for (int i = 0; i < tempSize; i++)
+	{
+		PrintArray(retStruct[i].arr, retStruct[i].size);
+	}
+	endl;
+	//free temp
+	FREE(temp);
+}
+
+void Binary(int* ret, int arrSize) {
+	int layerCnt = 1;
+	int even = 0;
+	for (int i = 0; i < arrSize; i++)
+	{
+		ret[i] = 0;
 	}
 	do
 	{
-		
+		int minimum = 0;
+		int cnt = 0;
+		do
+		{
+			for (int i = 0; i < layerCnt; i++)
+			{
+				if (ret[i] == minimum) {
+					if (layerCnt == 1) {
+						even += 2;
+						minimum += 2;
+						cnt++;
+						break;
+					}
+					else
+					{
+						for (int j = arrSize - 2; j >= i + 1; j--)
+						{
+							ret[j + 1] = ret[j];
+						}
+						ret[i + 1] = even;
+						even += 2;
+						minimum += 2;
+						cnt++;
+					}
+				}
+			}
+		} while (cnt < layerCnt);
+		PrintArray(ret, arrSize);
+		endl;
+		layerCnt *= 2;
+	} while (even < arrSize);
+}
+
+void Binary(int* ret, int arrSize) {
+	
+	int layer = 1;			//layer
+	int tempCnt = 0;		//추가될원소의개수
+	int even = 0;			//늘어날 짝수
+
+	//ret 배열 초기화
+	for (int i = 0; i < arrSize; i++)
+		ret[i] = 0;
+	
+	do
+	{
+		int minimum = 0;
+		int cnt = 0;
+		do
+		{
+			if (layer == 1) {
+				layer *= 2;
+				even += 2;
+				break;
+			}
+			for (int i = 0; i < layer; i++)
+			{
+				if (ret[i] <= minimum) {
+					for (int j = arrSize - 2; j >= i + 1; j--)
+					{
+						ret[j + 1] = ret[j];
+					}
+					ret[i + 1] = even;
+					even += 2;
+					minimum += 2;
+					i++;
+					//이부분 while 벗어나는 조건 만들어야함
+				}
+			}
+		} while (true);
 	} while (true);
 }
